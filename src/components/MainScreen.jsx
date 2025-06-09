@@ -29,7 +29,7 @@ const MainScreen = () => {
       <SoundToggle />
       
       <div className="container">
-        <Title level={1} className="title">⚔️ WAR COMMAND ⚔️</Title>
+        <Title level={1} className="title">⚔️ FLANK ⚔️</Title>
         <Paragraph className="subtitle">Create your epic war scenario</Paragraph>
         
         <Row gutter={[48, 24]} justify="center" style={{ marginTop: '4rem' }}>
