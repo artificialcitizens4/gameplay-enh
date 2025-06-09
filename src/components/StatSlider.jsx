@@ -10,10 +10,32 @@ const StatSlider = ({ label, value, onChange }) => {
     setDisplayValue(value);
   }, [value]);
 
-  const getStatColor = (val) => {
-    if (val <= 33) return '#ff4757';
-    if (val <= 66) return '#ffa502';
-    return '#2ed573';
+  const getStatColor = (val, isFatigue = false) => {
+    if (isFatigue) {
+      // Reverse logic for fatigue: 0 = good (green), 100 = bad (red)
+      if (val <= 33) return '#2ed573'; // Low fatigue = good (green)
+      if (val <= 66) return '#ffa502'; // Medium fatigue = warning (orange)
+      return '#ff4757'; // High fatigue = bad (red)
+    } else {
+      // Normal logic for other stats: higher = better
+      if (val <= 33) return '#ff4757';
+      if (val <= 66) return '#ffa502';
+      return '#2ed573';
+    }
+  };
+
+  const getStatLabel = (val, isFatigue = false) => {
+    if (isFatigue) {
+      // Reverse logic for fatigue
+      if (val <= 33) return 'FRESH'; // Low fatigue = fresh
+      if (val <= 66) return 'TIRED'; // Medium fatigue = tired
+      return 'EXHAUSTED'; // High fatigue = exhausted
+    } else {
+      // Normal logic for other stats
+      if (val <= 33) return 'LOW';
+      if (val <= 66) return 'MEDIUM';
+      return 'HIGH';
+    }
   };
 
   const handleChange = (newValue) => {
@@ -21,7 +43,10 @@ const StatSlider = ({ label, value, onChange }) => {
     onChange(newValue);
   };
 
-  const colorData = getStatColor(displayValue);
+  // Check if this is a fatigue slider based on the label
+  const isFatigueSlider = label.toLowerCase().includes('fatigue') || label.includes('😴');
+  const colorData = getStatColor(displayValue, isFatigueSlider);
+  const labelText = getStatLabel(displayValue, isFatigueSlider);
 
   return (
     <div className="stat-container">
@@ -40,7 +65,7 @@ const StatSlider = ({ label, value, onChange }) => {
               textShadow: `0 0 10px ${colorData}50`
             }}
           >
-            {displayValue}
+            {displayValue} ({labelText})
           </Text>
         </Col>
       </Row>
