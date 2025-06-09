@@ -21,16 +21,32 @@ const ViewCharactersScreen = () => {
   const [selectedTeam, setSelectedTeam] = useState(1);
   const [animationPhase, setAnimationPhase] = useState('entering');
 
-  const getStatColor = (value) => {
-    if (value <= 33) return '#ff4757';
-    if (value <= 66) return '#ffa502';
-    return '#2ed573';
+  const getStatColor = (value, isFatigue = false) => {
+    if (isFatigue) {
+      // Reverse logic for fatigue: 0 = good (green), 100 = bad (red)
+      if (value <= 33) return '#2ed573'; // Low fatigue = good (green)
+      if (value <= 66) return '#ffa502'; // Medium fatigue = warning (orange)
+      return '#ff4757'; // High fatigue = bad (red)
+    } else {
+      // Normal logic for other stats: higher = better
+      if (value <= 33) return '#ff4757';
+      if (value <= 66) return '#ffa502';
+      return '#2ed573';
+    }
   };
 
-  const getStatLabel = (value) => {
-    if (value <= 33) return 'LOW';
-    if (value <= 66) return 'MEDIUM';
-    return 'HIGH';
+  const getStatLabel = (value, isFatigue = false) => {
+    if (isFatigue) {
+      // Reverse logic for fatigue
+      if (value <= 33) return 'FRESH'; // Low fatigue = fresh
+      if (value <= 66) return 'TIRED'; // Medium fatigue = tired
+      return 'EXHAUSTED'; // High fatigue = exhausted
+    } else {
+      // Normal logic for other stats
+      if (value <= 33) return 'LOW';
+      if (value <= 66) return 'MEDIUM';
+      return 'HIGH';
+    }
   };
 
   const calculateTeamStrength = (teamPersonas) => {
@@ -928,14 +944,14 @@ const ViewCharactersScreen = () => {
                         <Row justify="space-between" align="middle">
                           <Col><Text style={{ color: 'rgba(255, 255, 255, 0.8)' }}>😴 Fatigue</Text></Col>
                           <Col>
-                            <Text style={{ color: getStatColor(100 - persona.fatigue), fontWeight: 'bold' }}>
-                              {persona.fatigue} ({getStatLabel(100 - persona.fatigue)})
+                            <Text style={{ color: getStatColor(persona.fatigue, true), fontWeight: 'bold' }}>
+                              {persona.fatigue} ({getStatLabel(persona.fatigue, true)})
                             </Text>
                           </Col>
                         </Row>
                         <Progress 
                           percent={100 - persona.fatigue} 
-                          strokeColor={getStatColor(100 - persona.fatigue)}
+                          strokeColor={getStatColor(persona.fatigue, true)}
                           trailColor="rgba(255,255,255,0.1)"
                           showInfo={false}
                           size="small"
