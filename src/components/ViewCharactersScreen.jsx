@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Typography, Space, Avatar, Progress, Descriptions, message } from 'antd';
+import { Card, Row, Col, Typography, Space, Avatar, Progress, message } from 'antd';
 import { ArrowLeftOutlined, RocketOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { setCurrentScreen } from '../store/slices/gameSlice';
@@ -734,7 +734,7 @@ const ViewCharactersScreen = () => {
         >
           <Row gutter={[32, 24]} align="middle">
             <Col xs={24} md={12}>
-              <div style={{ textAlign: 'center' }}>
+              <div style={{ textAlign: 'left' }}>
                 <Title level={4} style={{ margin: '0 0 1rem 0', color: '#ff6b35' }}>
                   🎯 SELECT TEAM
                 </Title>
