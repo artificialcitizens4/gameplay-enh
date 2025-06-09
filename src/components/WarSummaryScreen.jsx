@@ -19,21 +19,41 @@ const WarSummaryScreen = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [isTypingComplete, setIsTypingComplete] = useState(false);
 
-  // Use story summary from API if available, otherwise use the original story
-  const warStory = storySummary || `
-🌍 THE GREAT CONFLICT BEGINS 🌍
+  // Get the story to display - prioritize API data
+  const getWarStoryToDisplay = () => {
+    // First check for API game data story/baseStory
+    if (gameState.apiGameData?.baseStory && gameState.apiGameData.baseStory.trim()) {
+      return gameState.apiGameData.baseStory;
+    }
+    
+    if (gameState.apiGameData?.story && gameState.apiGameData.story.trim()) {
+      return gameState.apiGameData.story;
+    }
+    
+    // Then check storySummary from API
+    if (storySummary && storySummary.trim()) {
+      return storySummary;
+    }
+    
+    // Finally fall back to user's story
+    if (gameState.story.background && gameState.story.background.trim()) {
+      return gameState.story.background;
+    }
+    
+    // Create a default war story if nothing is available
+    return `🌍 THE GREAT CONFLICT BEGINS 🌍
 
-${gameState.story.background || 'In a world torn by conflict, two mighty forces prepare for the ultimate battle that will determine the fate of all.'}
+In a world torn by conflict, two mighty forces prepare for the ultimate battle that will determine the fate of all.
 
 ⚔️ THE OPPOSING FORCES ⚔️
 
-${gameState.story.team1Name || 'Team Alpha'} stands ready with ${gameState.story.team1Size || '500'} brave warriors, each trained in the arts of war and strategy. Their commanders have spent years preparing for this moment, knowing that victory depends not just on numbers, but on the courage and skill of every soldier.
+${gameState.story.team1Name || 'Team Alpha'} stands ready with ${gameState.story.team1Size || '4'} brave warriors, each trained in the arts of war and strategy. Their commanders have spent years preparing for this moment, knowing that victory depends not just on numbers, but on the courage and skill of every soldier.
 
-🛡️ Against them rises ${gameState.story.team2Name || 'Team Beta'} with ${gameState.story.team2Size || '750'} fierce fighters, united by their cause and driven by an unbreakable will to triumph. Their generals have forged them into an unstoppable force, ready to face any challenge.
+🛡️ Against them rises ${gameState.story.team2Name || 'Team Beta'} with ${gameState.story.team2Size || '4'} fierce fighters, united by their cause and driven by an unbreakable will to triumph. Their generals have forged them into an unstoppable force, ready to face any challenge.
 
 👥 THE CHAMPIONS 👥
 
-${gameState.story.characters || 'Elite warriors from both sides step forward as champions, each bringing unique skills and unwavering determination to the battlefield. These legendary figures will lead their forces through the chaos of war.'}
+Elite warriors from both sides step forward as champions, each bringing unique skills and unwavering determination to the battlefield. These legendary figures will lead their forces through the chaos of war.
 
 🔥 THE STAGE IS SET 🔥
 
@@ -41,8 +61,32 @@ The battlefield awaits. Ancient prophecies speak of this moment when heroes will
 
 The time for preparation has ended. The time for glory has begun.
 
-⚡ LET THE WAR COMMENCE! ⚡
-  `.trim();
+⚡ LET THE WAR COMMENCE! ⚡`;
+  };
+
+  // Get team names from API data or fallback to defaults
+  const getTeamNames = () => {
+    let team1Name = 'Team Alpha';
+    let team2Name = 'Team Beta';
+    
+    // Check if we have API data with team structure
+    if (gameState.apiGameData?.team_one?.name) {
+      team1Name = gameState.apiGameData.team_one.name;
+    } else if (gameState.story.team1Name) {
+      team1Name = gameState.story.team1Name;
+    }
+    
+    if (gameState.apiGameData?.team_two?.name) {
+      team2Name = gameState.apiGameData.team_two.name;
+    } else if (gameState.story.team2Name) {
+      team2Name = gameState.story.team2Name;
+    }
+    
+    return { team1Name, team2Name };
+  };
+
+  const { team1Name, team2Name } = getTeamNames();
+  const warStory = getWarStoryToDisplay();
 
   useEffect(() => {
     let index = 0;
@@ -97,6 +141,29 @@ The time for preparation has ended. The time for glory has begun.
       <div className="container">
         <Title level={1} className="title">📜 WAR CHRONICLES</Title>
         <Paragraph className="subtitle">The legend begins...</Paragraph>
+        
+        {/* Show API data source indicator */}
+        {gameState.apiGameData && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '2rem',
+            background: 'rgba(46, 213, 115, 0.1)',
+            border: '1px solid #2ed573',
+            borderRadius: '8px',
+            padding: '1rem',
+            maxWidth: '600px',
+            margin: '0 auto 2rem auto'
+          }}>
+            <Text style={{ color: '#2ed573', fontSize: '1rem', fontWeight: 'bold' }}>
+              🤖 API GENERATED STORY
+            </Text>
+            <br />
+            <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem' }}>
+              {gameState.apiGameData.baseStory ? 'Base Story' : gameState.apiGameData.story ? 'Story' : 'Generated Content'} • 
+              Game ID: {gameState.gameId || 'Unknown'}
+            </Text>
+          </div>
+        )}
         
         <Card 
           className="war-story-container"
@@ -165,7 +232,7 @@ The time for preparation has ended. The time for glory has begun.
                   size="small"
                   title={
                     <Text strong style={{ color: '#2ed573', fontSize: '1.2rem' }}>
-                      ⚔️ {gameState.story.team1Name}
+                      ⚔️ {team1Name}
                     </Text>
                   }
                   style={{ 
@@ -194,7 +261,7 @@ The time for preparation has ended. The time for glory has begun.
                               {persona.name}
                             </Text>
                             <Text style={{ color: '#2ed573', fontSize: '0.9rem' }}>
-                              {persona.role} • {persona.npcType}
+                              {persona.type} • {persona.npcType}
                             </Text>
                           </Col>
                           <Col>
@@ -226,7 +293,7 @@ The time for preparation has ended. The time for glory has begun.
                   size="small"
                   title={
                     <Text strong style={{ color: '#ff6b35', fontSize: '1.2rem' }}>
-                      🛡️ {gameState.story.team2Name}
+                      🛡️ {team2Name}
                     </Text>
                   }
                   style={{ 
@@ -255,7 +322,7 @@ The time for preparation has ended. The time for glory has begun.
                               {persona.name}
                             </Text>
                             <Text style={{ color: '#ff6b35', fontSize: '0.9rem' }}>
-                              {persona.role} • {persona.npcType}
+                              {persona.type} • {persona.npcType}
                             </Text>
                           </Col>
                           <Col>

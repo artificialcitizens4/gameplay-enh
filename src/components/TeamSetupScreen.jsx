@@ -24,21 +24,76 @@ const TeamSetupScreen = () => {
     }
   };
 
-  // Get the story to display - prioritize user's story over storySummary
+  // Get the story to display - prioritize API data over user input
   const getStoryToDisplay = () => {
-    // If user has entered their own story, use that
-    if (gameState.story.background && gameState.story.background.trim()) {
-      return gameState.story.background;
+    // First check for API game data story/baseStory
+    if (gameState.apiGameData?.baseStory && gameState.apiGameData.baseStory.trim()) {
+      return gameState.apiGameData.baseStory;
     }
     
-    // Otherwise, fall back to storySummary from API
+    if (gameState.apiGameData?.story && gameState.apiGameData.story.trim()) {
+      return gameState.apiGameData.story;
+    }
+    
+    // Then check storySummary from API
     if (gameState.storySummary && gameState.storySummary.trim()) {
       return gameState.storySummary;
+    }
+    
+    // Finally fall back to user's story
+    if (gameState.story.background && gameState.story.background.trim()) {
+      return gameState.story.background;
     }
     
     // Final fallback
     return 'No background story provided yet...';
   };
+
+  // Get team names from API data or fallback to defaults
+  const getTeamNames = () => {
+    let team1Name = 'Team Alpha';
+    let team2Name = 'Team Beta';
+    
+    // Check if we have API data with team structure
+    if (gameState.apiGameData?.team_one?.name) {
+      team1Name = gameState.apiGameData.team_one.name;
+    } else if (gameState.story.team1Name) {
+      team1Name = gameState.story.team1Name;
+    }
+    
+    if (gameState.apiGameData?.team_two?.name) {
+      team2Name = gameState.apiGameData.team_two.name;
+    } else if (gameState.story.team2Name) {
+      team2Name = gameState.story.team2Name;
+    }
+    
+    return { team1Name, team2Name };
+  };
+
+  // Get team sizes from API data or fallback to defaults
+  const getTeamSizes = () => {
+    let team1Size = 4;
+    let team2Size = 4;
+    
+    // Check if we have API data with team structure
+    if (gameState.apiGameData?.team_one?.persona?.length) {
+      team1Size = gameState.apiGameData.team_one.persona.length;
+    } else if (gameState.story.teamSizeA || gameState.story.team1Size) {
+      team1Size = gameState.story.teamSizeA || gameState.story.team1Size;
+    }
+    
+    if (gameState.apiGameData?.team_two?.persona?.length) {
+      team2Size = gameState.apiGameData.team_two.persona.length;
+    } else if (gameState.story.teamSizeB || gameState.story.team2Size) {
+      team2Size = gameState.story.teamSizeB || gameState.story.team2Size;
+    }
+    
+    return { team1Size, team2Size };
+  };
+
+  const { team1Name, team2Name } = getTeamNames();
+  const { team1Size, team2Size } = getTeamSizes();
+  const storyToDisplay = getStoryToDisplay();
 
   return (
     <div className="screen team-setup-screen">
@@ -86,7 +141,7 @@ const TeamSetupScreen = () => {
               style={{ height: '100%' }}
             >
               <Paragraph style={{ color: 'rgba(255, 255, 255, 0.8)', lineHeight: 1.6 }}>
-                {getStoryToDisplay()}
+                {storyToDisplay}
               </Paragraph>
               
               {/* Show game ID if available */}
@@ -134,7 +189,7 @@ const TeamSetupScreen = () => {
                 </div>
               )}
 
-              {/* Show story source indicator */}
+              {/* Show API data source indicator */}
               <div style={{ 
                 marginTop: '1rem', 
                 padding: '0.5rem',
@@ -143,14 +198,41 @@ const TeamSetupScreen = () => {
                 borderRadius: '4px'
               }}>
                 <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.7rem' }}>
-                  {gameState.story.background && gameState.story.background.trim() 
-                    ? '📝 User Story' 
+                  {gameState.apiGameData?.baseStory || gameState.apiGameData?.story
+                    ? '🤖 API Generated Story'
                     : gameState.storySummary && gameState.storySummary.trim()
                     ? '🤖 Generated Story Summary'
+                    : gameState.story.background && gameState.story.background.trim()
+                    ? '📝 User Story'
                     : '⚠️ No Story'
                   }
                 </Text>
               </div>
+
+              {/* Show team structure from API if available */}
+              {gameState.apiGameData && (gameState.apiGameData.team_one || gameState.apiGameData.team_two) && (
+                <div style={{ 
+                  marginTop: '1rem', 
+                  padding: '0.5rem',
+                  background: 'rgba(46, 213, 115, 0.05)',
+                  border: '1px solid rgba(46, 213, 115, 0.2)',
+                  borderRadius: '4px'
+                }}>
+                  <Text style={{ color: '#2ed573', fontSize: '0.8rem', fontWeight: 'bold', display: 'block' }}>
+                    🏛️ API Team Structure:
+                  </Text>
+                  {gameState.apiGameData.team_one && (
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.7rem', display: 'block' }}>
+                      Team 1: {gameState.apiGameData.team_one.name} ({gameState.apiGameData.team_one.persona?.length || 0} warriors)
+                    </Text>
+                  )}
+                  {gameState.apiGameData.team_two && (
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.7rem', display: 'block' }}>
+                      Team 2: {gameState.apiGameData.team_two.name} ({gameState.apiGameData.team_two.persona?.length || 0} warriors)
+                    </Text>
+                  )}
+                </div>
+              )}
             </Card>
           </Col>
           
@@ -165,7 +247,7 @@ const TeamSetupScreen = () => {
                     
                     <div className="team-info">
                       <Title level={4} style={{ color: '#2ed573', textAlign: 'center', margin: '0 0 1rem 0' }}>
-                        {gameState.story.team1Name || 'Team Alpha'}
+                        {team1Name}
                       </Title>
                       <Paragraph style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.8)', margin: 0 }}>
                         Elite warriors ready for battle
@@ -191,7 +273,7 @@ const TeamSetupScreen = () => {
                         margin: '0 auto',
                         boxShadow: '0 0 20px rgba(46, 213, 115, 0.3)'
                       }}>
-                        {gameState.story.teamSizeA || gameState.story.team1Size || 4}
+                        {team1Size}
                       </div>
                       <Text style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem', marginTop: '0.5rem', display: 'block' }}>
                         Warriors
@@ -216,7 +298,7 @@ const TeamSetupScreen = () => {
                     
                     <div className="team-info">
                       <Title level={4} style={{ color: '#ff6b35', textAlign: 'center', margin: '0 0 1rem 0' }}>
-                        {gameState.story.team2Name || 'Team Beta'}
+                        {team2Name}
                       </Title>
                       <Paragraph style={{ textAlign: 'center', color: 'rgba(255, 255, 255, 0.8)', margin: 0 }}>
                         Fierce fighters prepared for war
@@ -242,7 +324,7 @@ const TeamSetupScreen = () => {
                         margin: '0 auto',
                         boxShadow: '0 0 20px rgba(255, 107, 53, 0.3)'
                       }}>
-                        {gameState.story.teamSizeB || gameState.story.team2Size || 4}
+                        {team2Size}
                       </div>
                       <Text style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem', marginTop: '0.5rem', display: 'block' }}>
                         Warriors
@@ -268,19 +350,19 @@ const TeamSetupScreen = () => {
                   ⚔️ BATTLE PREVIEW
                 </Title>
                 <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1rem' }}>
-                  {gameState.story.team1Name || 'Team Alpha'} ({gameState.story.teamSizeA || gameState.story.team1Size || 4} warriors) 
+                  {team1Name} ({team1Size} warriors) 
                   <span style={{ color: '#ff4757', fontWeight: 'bold', margin: '0 1rem' }}>VS</span>
-                  {gameState.story.team2Name || 'Team Beta'} ({gameState.story.teamSizeB || gameState.story.team2Size || 4} warriors)
+                  {team2Name} ({team2Size} warriors)
                 </Text>
                 
                 {/* Show army size difference if any */}
-                {(gameState.story.teamSizeA || gameState.story.team1Size || 4) !== (gameState.story.teamSizeB || gameState.story.team2Size || 4) && (
+                {team1Size !== team2Size && (
                   <Text style={{ color: '#ffa502', fontSize: '0.9rem', fontStyle: 'italic' }}>
                     ⚖️ Uneven forces detected - strategic advantage to larger army
                   </Text>
                 )}
                 
-                {(gameState.story.teamSizeA || gameState.story.team1Size || 4) === (gameState.story.teamSizeB || gameState.story.team2Size || 4) && (
+                {team1Size === team2Size && (
                   <Text style={{ color: '#2ed573', fontSize: '0.9rem', fontStyle: 'italic' }}>
                     ⚖️ Balanced forces - victory depends on strategy and skill
                   </Text>
