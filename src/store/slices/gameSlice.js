@@ -29,7 +29,7 @@ const initialState = {
   apiGameData: null,
   personas: [],
   factions: {},
-  baseStory: '',
+  storySummary: '', // Changed from baseStory to storySummary
   gameId: null,
   createdAt: null,
   // Track persona modifications
@@ -131,7 +131,7 @@ const gameSlice = createSlice({
       
       state.apiGameData = apiData;
       state.gameId = apiData.id;
-      state.baseStory = apiData.baseStory || apiData.story || '';
+      state.storySummary = apiData.storySummary || apiData.baseStory || apiData.story || ''; // Updated to use storySummary first
       state.createdAt = apiData.createdAt;
       
       // Handle personas array - ensure we have the correct structure
@@ -169,8 +169,10 @@ const gameSlice = createSlice({
       // Reset persona modifications when new data is loaded
       state.personaModifications = {};
       
-      // Update story with API data
-      if (apiData.baseStory) {
+      // Update story with API data - prioritize storySummary
+      if (apiData.storySummary) {
+        state.story.background = apiData.storySummary;
+      } else if (apiData.baseStory) {
         state.story.background = apiData.baseStory;
       } else if (apiData.story) {
         state.story.background = apiData.story;

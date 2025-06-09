@@ -24,16 +24,16 @@ const TeamSetupScreen = () => {
     }
   };
 
-  // Get the story to display - prioritize user's story over baseStory
+  // Get the story to display - prioritize user's story over storySummary
   const getStoryToDisplay = () => {
     // If user has entered their own story, use that
     if (gameState.story.background && gameState.story.background.trim()) {
       return gameState.story.background;
     }
     
-    // Otherwise, fall back to baseStory from API
-    if (gameState.baseStory && gameState.baseStory.trim()) {
-      return gameState.baseStory;
+    // Otherwise, fall back to storySummary from API
+    if (gameState.storySummary && gameState.storySummary.trim()) {
+      return gameState.storySummary;
     }
     
     // Final fallback
@@ -145,8 +145,8 @@ const TeamSetupScreen = () => {
                 <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.7rem' }}>
                   {gameState.story.background && gameState.story.background.trim() 
                     ? '📝 User Story' 
-                    : gameState.baseStory && gameState.baseStory.trim()
-                    ? '🤖 Generated Story'
+                    : gameState.storySummary && gameState.storySummary.trim()
+                    ? '🤖 Generated Story Summary'
                     : '⚠️ No Story'
                   }
                 </Text>
