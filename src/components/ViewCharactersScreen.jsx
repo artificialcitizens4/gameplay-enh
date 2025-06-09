@@ -950,7 +950,7 @@ const ViewCharactersScreen = () => {
                           </Col>
                         </Row>
                         <Progress 
-                          percent={100 - persona.fatigue} 
+                          percent={persona.fatigue} 
                           strokeColor={getStatColor(persona.fatigue, true)}
                           trailColor="rgba(255,255,255,0.1)"
                           showInfo={false}
